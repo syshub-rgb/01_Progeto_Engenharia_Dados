@@ -1,0 +1,18 @@
+hdfs dfs -mkdir /contar/
+hdfs dfs -ls /
+
+hdfs dfs -put pesquisa.txt /contar/pesquisa.txt
+hdfs dfs -put livros.txt /livros/livros.txt
+
+hdfs dfs -ls /contar/
+hdfs dfs -ls /livros/
+
+hadoop jar /home/cloudera/MRProgramDemo.jar PackageDemo.WordCount  /contar/pesquisa.txt /contar2
+hadoop jar /home/cloudera/MRProgramDemo.jar PackageDemo.WordCount  /livros/livros.txt /livros2
+
+hdfs dfs -ls /contar2
+hdfs dfs -ls /livros2
+
+
+hdfs dfs -cat /contar2/part-r-00000
+hdfs dfs -cat /livros2/part-r-00000
