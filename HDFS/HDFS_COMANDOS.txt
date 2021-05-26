@@ -1,18 +1,52 @@
-hdfs dfs -mkdir /contar/
+-- lista um conteudo de uma pasta 
+hdfs dfs -ls -R /carros
+
+-- mostra as pastas na raiz   
 hdfs dfs -ls /
 
+-- Cria diretório
+hdfs dfs -mkdir /contar/
+hdfs dfs -mkdir /livros
+hdfs dfs -mkdir /carros
+hdfs dfs -mkdir /animais
+
+-- Move o arquivo ou diretório do sistema local para o hdfs
+hdfs dfs -mv animais.txt /animais
+
+-- Remove arquivo ou pasta
+hdfs dfs -rm /animais/animais.txt
+
+-- visualiza todos os ditetórios na raiz
+hdfs dfs -ls /
+
+-- copia o arquivo para a raiz
 hdfs dfs -put pesquisa.txt /contar/pesquisa.txt
 hdfs dfs -put livros.txt /livros/livros.txt
+hdfs dfs -put carros.txt /carros/carros.txt
+hdfs dfs -put animais.txt /carros/animais.txt
 
+
+
+-- verifica se o arquivo está lá na paste de origem
 hdfs dfs -ls /contar/
 hdfs dfs -ls /livros/
+hdfs dfs -ls /carros/
+hdfs dfs -ls /animais/
 
+-- executa o jar desenvolvido do programa java e cria a segunda pasta
 hadoop jar /home/cloudera/MRProgramDemo.jar PackageDemo.WordCount  /contar/pesquisa.txt /contar2
 hadoop jar /home/cloudera/MRProgramDemo.jar PackageDemo.WordCount  /livros/livros.txt /livros2
+hadoop jar /home/cloudera/MRProgramDemo.jar PackageDemo.WordCount  /carros/carros.txt /carros2
+hadoop jar /home/cloudera/MRProgramDemo.jar PackageDemo.WordCount  /animais/animais.txt /animais2
 
+-- verifica se o arquivo está lá na paste de destino
 hdfs dfs -ls /contar2
 hdfs dfs -ls /livros2
+hdfs dfs -ls /carros2
+hdfs dfs -ls /animais2
 
-
+-- Verifica como os arquivos ficaram após a contagem
 hdfs dfs -cat /contar2/part-r-00000
 hdfs dfs -cat /livros2/part-r-00000
+hdfs dfs -cat /carros2/part-r-00000
+hdfs dfs -cat /animais2/part-r-00000
