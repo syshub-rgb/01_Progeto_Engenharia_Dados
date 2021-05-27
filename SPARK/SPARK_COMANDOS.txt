@@ -1,0 +1,328 @@
+-- variavel de contexto conexão do shel com o spark
+sc 
+
+numeros = sc.parallelize([1,2,3,4,5,6,7,8,9,10])
+numeros.first()
+numeros.take(5)
+numeros.top(5)
+numeros.collect()
+numeros.count()
+numeros.mean()
+numeros.sum()
+numeros.max()
+numeros.min()
+numeros.variance()
+
+
+numeros.persist(StorageLevel.MEMORY_ONLY)
+
+
+filtro = numeros.filter(lambda filtro: filtro > 2)
+filtro.collect()
+
+
+amostra = numeros.sample(True,0.5,1)
+amostra.collect()
+
+
+mapa = numeros.map(lambda mapa: mapa * 2)
+mapa.collect()
+
+
+numeros2 = sc.parallelize([6,7,8,9,10])
+
+
+uniao = numeros.union(numeros2)
+uniao.collect()
+
+interseccao = numeros.intersection(numeros2)
+interseccao.collect()
+
+
+subtrai = numeros.subtract(numeros2)
+subtrai.collect()
+
+
+compras = sc.parallelize([(1,200),(2,300),(3,120),(4,250),(5,78)])
+compras.collect()
+
+chaves = compras.keys()
+chaves.collect()
+
+valores = compras.values()
+valores.collect()
+
+compras.countByKey()
+
+soma = compras.mapValues(lambda soma: soma + 1)
+soma.collect()
+
+agrupa = compras.groupByKey().mapValues(list)
+agrupa.collect()
+
+debitos = sc.parallelize([(1,20),(2,300),(2,300)])
+debitos.collect()
+
+resultados = compras.join(debitos)
+resultados.collect()
+
+
+semdebito = compras.subtractByKey(debitos)
+semdebito.collect()
+
+pesquisa = sc.textFile("file:///home/cloudera/Downloads/pesquisa.txt")
+pesquisa.take(5)
+
+
+contagem = pesquisa.flatMap(lambda palavra: palavra.split(" "))
+contagem = contagem.map(lambda pal: (pal,1))
+contagem = contagem.reduceByKey(lambda a, b: a + b)
+contagem.take(5)
+contagem.saveAsTextFile("conta")
+
+
+-- verificando o arquivo criado 
+hdfs dfs -ls /user/cloudera/conta
+hdfs dfs -cat /user/cloudera/conta/part-00000
+
+-- aqui o resultado do arquivo salvo ou o conteúdo
+(u'SL429F', 78)
+(u'Riff50SR', 104)
+(u'BigWhell', 130)
+(u'Auge555', 364)
+(u'AudaxVentus', 104)
+(u'StradaRacing', 130)
+(u'ImpactPro', 26)
+(u'Elite', 286)
+
+--- Executando o Hive com Spark 
+from pyspark.sql import HiveContext
+contexto = HiveContext(sc)
+banco = contexto.table("ed.des_vendas")
+
+banco.show()
+
++--------------------+------+----+------+----------+-------------+----------+--------+--------------------+----------+---+---+----+---------+----------------+
+|             cliente|estado|sexo|status|quantidade|valorunitario|valortotal|desconto|             produto|      data|dia|mes| ano|trimestre|            nome|
++--------------------+------+----+------+----------+-------------+----------+--------+--------------------+----------+---+---+----+---------+----------------+
+|   Gertrudes Hidalgo|    PA|   F|Silver|         1|        150.4|     150.4|     1.5|Luva De Ciclismo ...|2016-01-01|  1|  1|2016|        1|   Iberê Lacerda|
+|Adelina Buenaventura|    RJ|   M|Silver|         1|      7820.85|   7820.85|     0.0|Bicicleta Altools...|2016-01-01|  1|  1|2016|        1|    Armando Lago|
+|Adelina Buenaventura|    RJ|   M|Silver|         1|        97.75|     97.75|    0.98|Bermuda Predactor...|2016-01-01|  1|  1|2016|        1|    Armando Lago|
+|Adelina Buenaventura|    RJ|   M|Silver|         1|        135.0|     135.0|    1.35|Camiseta Predacto...|2016-01-01|  1|  1|2016|        1|    Armando Lago|
+|Adelina Buenaventura|    RJ|   M|Silver|         1|      7820.85|   7820.85|     0.0|Bicicleta Altools...|2016-01-02|  2|  1|2016|        1|  Hélio Liberato|
+|Adelina Buenaventura|    RJ|   M|Silver|         2|       2955.0|    5910.0|    59.1|Bicicleta Gometws...|2016-01-02|  2|  1|2016|        1|  Hélio Liberato|
+|Adelina Buenaventura|    RJ|   M|Silver|         1|        97.75|     97.75|    0.98|Bermuda Predactor...|2016-01-02|  2|  1|2016|        1|  Hélio Liberato|
+|    Antão Corte-Real|    ES|   M|Silver|         2|       2966.0|    5932.0|     0.0|Bicicleta Gometws...|2016-01-02|  2|  1|2016|        1|Jéssica Castelão|
+|    Antão Corte-Real|    ES|   M|Silver|         1|        155.0|     155.0|     0.0|Capacete Gometws ...|2016-01-02|  2|  1|2016|        1|Jéssica Castelão|
+|      Diodete Carijó|    PB|   F|Silver|         1|       8852.0|    8852.0|     0.0|Bicicleta Aro 29 ...|2016-01-03|  3|  1|2016|        1| Napoleão Méndez|
+|      Diodete Carijó|    PB|   F|Silver|         2|      3255.08|   6510.16|    65.1|Bicicleta Gts Adv...|2016-01-03|  3|  1|2016|        1| Napoleão Méndez|
+|      Diodete Carijó|    PB|   F|Silver|         1|       7658.0|    7658.0|     0.0|Bicicleta Trinc C...|2016-01-03|  3|  1|2016|        1| Napoleão Méndez|
+|      Diodete Carijó|    PB|   F|Silver|         1|       2955.0|    2955.0|     0.0|Bicicleta Gometws...|2016-01-03|  3|  1|2016|        1| Napoleão Méndez|
+|      Diodete Carijó|    PB|   F|Silver|         1|        121.5|     121.5|    1.22|Camiseta Predacto...|2016-01-03|  3|  1|2016|        1| Napoleão Méndez|
+|  Cássio Bettencourt|    BA|   M|Silver|         2|       9201.0|   18402.0|  184.02|Bicicleta Altools...|2016-01-04|  4|  1|2016|        1|    Simão Rivero|
+|  Greice Lameirinhas|    PI|   F|Silver|         1|       8852.0|    8852.0|     0.0|Bicicleta Aro 29 ...|2016-01-06|  6|  1|2016|        1|Capitolino Bahía|
+|     Clóvis Pamplona|    PB|   M|Silver|         1|       2364.0|    2364.0|   23.64|Bicicleta Gometws...|2016-01-06|  6|  1|2016|        1|Jéssica Castelão|
+|     Clóvis Pamplona|    PB|   M|Silver|         1|        155.0|     155.0|    1.55|Capacete Gometws ...|2016-01-06|  6|  1|2016|        1|Jéssica Castelão|
+|     Clóvis Pamplona|    PB|   M|Silver|         1|        188.0|     188.0|    1.88|Luva De Ciclismo ...|2016-01-06|  6|  1|2016|        1|Jéssica Castelão|
+|     Clóvis Pamplona|    PB|   M|Silver|         1|        97.75|     97.75|    0.98|Bermuda Predactor...|2016-01-06|  6|  1|2016|        1|Jéssica Castelão|
++--------------------+------+----+------+----------+-------------+----------+--------+--------------------+----------+---+---+----+---------+----------------+
+only showing top 20 rows
+
+
+banco.registerTempTable("des_vendas")
+contexto.sql("select * from des_vendas").show()
+
++--------------------+------+----+------+----------+-------------+----------+--------+--------------------+----------+---+---+----+---------+----------------+
+|             cliente|estado|sexo|status|quantidade|valorunitario|valortotal|desconto|             produto|      data|dia|mes| ano|trimestre|            nome|
++--------------------+------+----+------+----------+-------------+----------+--------+--------------------+----------+---+---+----+---------+----------------+
+|   Gertrudes Hidalgo|    PA|   F|Silver|         1|        150.4|     150.4|     1.5|Luva De Ciclismo ...|2016-01-01|  1|  1|2016|        1|   Iberê Lacerda|
+|Adelina Buenaventura|    RJ|   M|Silver|         1|      7820.85|   7820.85|     0.0|Bicicleta Altools...|2016-01-01|  1|  1|2016|        1|    Armando Lago|
+|Adelina Buenaventura|    RJ|   M|Silver|         1|        97.75|     97.75|    0.98|Bermuda Predactor...|2016-01-01|  1|  1|2016|        1|    Armando Lago|
+|Adelina Buenaventura|    RJ|   M|Silver|         1|        135.0|     135.0|    1.35|Camiseta Predacto...|2016-01-01|  1|  1|2016|        1|    Armando Lago|
+|Adelina Buenaventura|    RJ|   M|Silver|         1|      7820.85|   7820.85|     0.0|Bicicleta Altools...|2016-01-02|  2|  1|2016|        1|  Hélio Liberato|
+|Adelina Buenaventura|    RJ|   M|Silver|         2|       2955.0|    5910.0|    59.1|Bicicleta Gometws...|2016-01-02|  2|  1|2016|        1|  Hélio Liberato|
+|Adelina Buenaventura|    RJ|   M|Silver|         1|        97.75|     97.75|    0.98|Bermuda Predactor...|2016-01-02|  2|  1|2016|        1|  Hélio Liberato|
+|    Antão Corte-Real|    ES|   M|Silver|         2|       2966.0|    5932.0|     0.0|Bicicleta Gometws...|2016-01-02|  2|  1|2016|        1|Jéssica Castelão|
+|    Antão Corte-Real|    ES|   M|Silver|         1|        155.0|     155.0|     0.0|Capacete Gometws ...|2016-01-02|  2|  1|2016|        1|Jéssica Castelão|
+|      Diodete Carijó|    PB|   F|Silver|         1|       8852.0|    8852.0|     0.0|Bicicleta Aro 29 ...|2016-01-03|  3|  1|2016|        1| Napoleão Méndez|
+|      Diodete Carijó|    PB|   F|Silver|         2|      3255.08|   6510.16|    65.1|Bicicleta Gts Adv...|2016-01-03|  3|  1|2016|        1| Napoleão Méndez|
+|      Diodete Carijó|    PB|   F|Silver|         1|       7658.0|    7658.0|     0.0|Bicicleta Trinc C...|2016-01-03|  3|  1|2016|        1| Napoleão Méndez|
+|      Diodete Carijó|    PB|   F|Silver|         1|       2955.0|    2955.0|     0.0|Bicicleta Gometws...|2016-01-03|  3|  1|2016|        1| Napoleão Méndez|
+|      Diodete Carijó|    PB|   F|Silver|         1|        121.5|     121.5|    1.22|Camiseta Predacto...|2016-01-03|  3|  1|2016|        1| Napoleão Méndez|
+|  Cássio Bettencourt|    BA|   M|Silver|         2|       9201.0|   18402.0|  184.02|Bicicleta Altools...|2016-01-04|  4|  1|2016|        1|    Simão Rivero|
+|  Greice Lameirinhas|    PI|   F|Silver|         1|       8852.0|    8852.0|     0.0|Bicicleta Aro 29 ...|2016-01-06|  6|  1|2016|        1|Capitolino Bahía|
+|     Clóvis Pamplona|    PB|   M|Silver|         1|       2364.0|    2364.0|   23.64|Bicicleta Gometws...|2016-01-06|  6|  1|2016|        1|Jéssica Castelão|
+|     Clóvis Pamplona|    PB|   M|Silver|         1|        155.0|     155.0|    1.55|Capacete Gometws ...|2016-01-06|  6|  1|2016|        1|Jéssica Castelão|
+|     Clóvis Pamplona|    PB|   M|Silver|         1|        188.0|     188.0|    1.88|Luva De Ciclismo ...|2016-01-06|  6|  1|2016|        1|Jéssica Castelão|
+|     Clóvis Pamplona|    PB|   M|Silver|         1|        97.75|     97.75|    0.98|Bermuda Predactor...|2016-01-06|  6|  1|2016|        1|Jéssica Castelão|
++--------------------+------+----+------+----------+-------------+----------+--------+--------------------+----------+---+---+----+---------+----------------+
+only showing top 20 rows
+
+
+
+contexto.sql("select sum(valortotal) from des_vendas").show()
+
++-----------------+
+|              _c0|
++-----------------+
+|3054162.741256714|
++-----------------+
+
+
+vendas = contexto.sql("select * from des_vendas")
+vendas.show() 
+
+
+vendas.printSchema()
+root
+ |-- cliente: string (nullable = true)
+ |-- estado: string (nullable = true)
+ |-- sexo: string (nullable = true)
+ |-- status: string (nullable = true)
+ |-- quantidade: integer (nullable = true)
+ |-- valorunitario: float (nullable = true)
+ |-- valortotal: float (nullable = true)
+ |-- desconto: float (nullable = true)
+ |-- produto: string (nullable = true)
+ |-- data: date (nullable = true)
+ |-- dia: integer (nullable = true)
+ |-- mes: integer (nullable = true)
+ |-- ano: integer (nullable = true)
+ |-- trimestre: integer (nullable = true)
+ |-- nome: string (nullable = true)
+
+>>>
+
+vendas.select('estado','status').show()
++------+------+
+|estado|status|
++------+------+
+|    PA|Silver|
+|    RJ|Silver|
+|    RJ|Silver|
+|    RJ|Silver|
+|    RJ|Silver|
+|    RJ|Silver|
+|    RJ|Silver|
+|    ES|Silver|
+|    ES|Silver|
+|    PB|Silver|
+|    PB|Silver|
+|    PB|Silver|
+|    PB|Silver|
+|    PB|Silver|
+|    BA|Silver|
+|    PI|Silver|
+|    PB|Silver|
+|    PB|Silver|
+|    PB|Silver|
+|    PB|Silver|
++------+------+
+only showing top 20 rows
+
+
+vendas.select('estado','status').distinct().show(30)
+
++------+--------+
+|estado|  status|
++------+--------+
+|    CE|Platinum|
+|    RJ|    Gold|
+|    BA|  Silver|
+|    PE|  Silver|
+|    AP|  Silver|
+|    MA|  Silver|
+|    RS|  Silver|
+|    RN|  Silver|
+|    MG|  Silver|
+|    SE|  Silver|
+|    GO|  Silver|
+|    SP|  Silver|
+|    PA|  Silver|
+|    AL|  Silver|
+|    RO|  Silver|
+|    RR|Platinum|
+|    DF|  Silver|
+|    MS|  Silver|
+|    RJ|  Silver|
+|    PR|  Silver|
+|    PB|  Silver|
+|    CE|  Silver|
+|    AM|  Silver|
+|    ES|  Silver|
+|    BA|    Gold|
+|    PE|    Gold|
+|    MT|  Silver|
+|    AC|  Silver|
+|    SE|Platinum|
+|    PI|  Silver|
++------+--------+
+only showing top 30 rows
+
+
+
+vendas.filter(vendas.estado=='RS').show()
+
++-----------------+------+----+------+----------+-------------+----------+--------+--------------------+----------+---+---+----+---------+----------------+
+|          cliente|estado|sexo|status|quantidade|valorunitario|valortotal|desconto|             produto|      data|dia|mes| ano|trimestre|            nome|
++-----------------+------+----+------+----------+-------------+----------+--------+--------------------+----------+---+---+----+---------+----------------+
+|Gertrudes Infante|    RS|   F|Silver|         1|      7038.77|   7038.77|  351.94|Bicicleta Altools...|2016-03-17| 17|  3|2016|        1|    Simão Rivero|
+|Gertrudes Infante|    RS|   F|Silver|         1|      5417.42|   5417.42|   54.17|Bicicleta Aro 29 ...|2016-04-21| 21|  4|2016|        2| Godo Capiperibe|
+|Gertrudes Infante|    RS|   F|Silver|         1|        115.0|     115.0|    1.15|Bermuda Predactor...|2016-04-21| 21|  4|2016|        2| Godo Capiperibe|
+|Gertrudes Infante|    RS|   F|Silver|         1|       7524.2|    7524.2|  376.21|Bicicleta Aro 29 ...|2016-05-22| 22|  5|2016|        2|Capitolino Bahía|
+|Gertrudes Infante|    RS|   F|Silver|         1|      2268.99|   2268.99|  113.45|Bicicleta Gometws...|2016-05-22| 22|  5|2016|        2|Capitolino Bahía|
+|Gertrudes Infante|    RS|   F|Silver|         1|        188.0|     188.0|    7.52|Luva De Ciclismo ...|2016-05-22| 22|  5|2016|        2|Capitolino Bahía|
+|Gertrudes Infante|    RS|   F|Silver|         1|         82.8|      82.8|    2.48|Bermuda Predactor...|2016-05-22| 22|  5|2016|        2|Capitolino Bahía|
+|Gertrudes Infante|    RS|   F|Silver|         1|       114.75|    114.75|    6.89|Camiseta Predacto...|2016-05-22| 22|  5|2016|        2|Capitolino Bahía|
+|  António Lousado|    RS|   M|Silver|         1|       2521.1|    2521.1|  630.28|Bicicleta Gometws...|2016-10-18| 18| 10|2016|        4|    Simão Rivero|
+|  António Lousado|    RS|   M|Silver|         1|        135.0|     135.0|   33.75|Camiseta Predacto...|2016-10-18| 18| 10|2016|        4|    Simão Rivero|
+|  António Lousado|    RS|   M|Silver|         1|       2955.0|    2955.0| 1152.45|Bicicleta Gometws...|2016-12-06|  6| 12|2016|        4|   Iberê Lacerda|
+|  António Lousado|    RS|   M|Silver|         1|        105.4|     105.4|   37.94|Capacete Gometws ...|2016-12-06|  6| 12|2016|        4|   Iberê Lacerda|
++-----------------+------+----+------+----------+-------------+----------+--------+--------------------+----------+---+---+----+---------+----------------+
+
+
+vendas.filter(vendas.estado=='RS').count()
+12
+>>>
+
+
+---->>> Exemplo do Spark Streming
+
+mkdir spark 
+chmod 777 spark
+
+vi exemplo.py
+
+from pyspark import SapakContext
+from pyspark.streaming import StreamingContext
+
+sc = SapakContext("local[2]","Contagem")
+ssc = StreamingContext(sc,10)
+
+pesquisa = ssc.textFileStream("file:///home/cloudera/spark/")
+
+contagem = pesquisa.flatMap(lambda palavra: palavra.split(" "))
+contagem = contagem.map(lambda pal: (pal,1))
+contagem = conta.reduceByKey(lambda a, b: a + b)
+
+contagem.pprint()
+
+ssc.start()
+ssc.awaitTermination()
+
+
+spark-submit /home/cloudera/exemplo.py
+
+-- resultado 
+
+-------------------------------------------
+Time: 2021-05-27 10:23:20
+-------------------------------------------
+(u'SL429F', 78)
+(u'Elite', 286)
+(u'ImpactPro', 26)
+(u'BigWhell', 130)
+(u'Auge555', 364)
+(u'AudaxVentus', 104)
+(u'StradaRacing', 130)
+(u'Riff50SR', 104)
