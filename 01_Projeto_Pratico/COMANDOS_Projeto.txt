@@ -1,0 +1,125 @@
+-- acessando o Postgres
+sudo -u postgres psql
+
+-- criando  a base no postgre
+create database locadora;
+
+\c locadora
+
+--mudandoa hora
+SET DATASTYLE TO PostgreSQL,European;
+
+-- criando as tabelas e insert no Postgre
+\i /home/cloudera/Downloads/create.sql
+\i /home/cloudera/Downloads/insert.sql
+\i /home/cloudera/Downloads/insert_2.sql
+
+-- verificando os dados no postgre
+select count(*) from clientes;
+select count(*) from veiculos;
+select count(*) from despachantes;
+select count(*) from locacao;
+
+-- conectando no HIVE 
+beeline
+
+-- conectando no HIVE local 
+!connect jdbc:hive2://
+
+create database locadora;
+show databases;
+
+use locadora;
+show tables;
+
+
+-- comandos do SQOOP 
+sqoop import -connect jdbc:postgresql://127.0.0.1/locadora --username postgres --password 123456 --table clientes2 --hive-import --create-hive-table --hive-table LOCADORA.CLIENTES2;
+sqoop import -connect jdbc:postgresql://127.0.0.1/locadora --username postgres --password 123456 --table veiculos --hive-import --create-hive-table --hive-table LOCADORA.veiculos;
+sqoop import -connect jdbc:postgresql://127.0.0.1/locadora --username postgres --password 123456 --table despachantes --hive-import --create-hive-table --hive-table LOCADORA.despachantes;
+sqoop import -connect jdbc:postgresql://127.0.0.1/locadora --username postgres --password 123456 --table locacao2 --hive-import --create-hive-table --hive-table LOCADORA.LOCACAO2;
+
+ 
+
+
+
+-- verificando no HIVE 
+show tables;
+OK
++---------------+--+
+|   tab_name    |
++---------------+--+
+| clientes2     |
+| despachantes  |
+| locacao2      |
+| veiculos      |
++---------------+--+
+4 rows selected (0.062 seconds)
+0: jdbc:hive2://>
+
+
+--- vendo a quantidades de registros no HIVE.
+select count(*) from clientes;
+select count(*) from veiculos;
+select count(*) from despachantes;
+select count(*) from locacao;
+
+
+--- criação das viwes para responder as análises de dados.
+
+-- quais veiculos foram locados em determinado pediodo
+create view locperiodo
+as 
+select veic.modelo as modelo,
+month(loc.datalocacao) as mes,
+year(loc.datalocacao) as ano, 
+count(*) as total
+from locacao2 loc join veiculos veic on(loc.idveiculo = veic.idveiculo)
+group by veic.modelo,month(loc.datalocacao),year(loc.datalocacao)
+order by total desc;
+
+
+-- quais despachantes locaram quais veiculos 
+create view locdespachante
+as 
+select desp.nome as nome , veic.modelo as modelo,
+month(loc.datalocacao) as mes,
+year(loc.datalocacao) as ano, 
+count(*) as total 
+from locacao2 loc join veiculos veic on(loc.idveiculo = veic.idveiculo)
+join despachantes desp on (loc.iddespachante = desp.iddespachante)
+group by desp.nome, veic.modelo,
+month(loc.datalocacao), year(loc.datalocacao)
+order by total desc;
+
+
+-- qual o faturamento por periodo
+create view locfaturamento
+as
+select month(loc.datalocacao) as mes,
+year(loc.datalocacao) as ano, 
+sum(loc.total) as total 
+from locacao2 loc 
+group by month(loc.datalocacao),
+year(loc.datalocacao)
+order by  ano, mes;
+
+
+-- quais clientes locaram quais veiculos 
+create view loccliente
+as
+select cli.nome, month(loc.datalocacao) as mes ,
+year(loc.datalocacao) as ano, 
+sum(loc.total) as total 
+from locacao2 loc
+join clientes2 cli on(cli.idcliente = loc.idcliente)
+group by  cli.nome, month(loc.datalocacao),
+year(loc.datalocacao) order by cli.nome;
+
+
+
+
+select * from locperiodo;
+select * from locdespachante;
+select * from locfaturamento;
+select * from loccliente;
