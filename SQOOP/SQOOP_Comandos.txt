@@ -1,0 +1,23 @@
+#driver
+cd /home/cloudera/Downloads
+wget http://jdbc.postgresql.org/download/postgresql-9.2-1002.jdbc4.jar
+sudo cp postgresql-9.2-1002.jdbc4.jar  /var/lib/sqoop/postgresql-9.2-1002.jdbc4.jar
+
+#listagem db
+sqoop list-databases --connect jdbc:postgresql://127.0.0.1/ --username postgres --password 123456
+
+#listagem tabelas
+sqoop list-tables --connect jdbc:postgresql://127.0.0.1/ed --username postgres --password 123456 -- --schema dimensional
+
+#importar
+sqoop import-all-tables --connect jdbc:postgresql://127.0.0.1/ed --username postgres --password 123456 -- --schema dimensional
+
+
+
+-- comandos do SQOOP 
+sqoop import -connect jdbc:postgresql://127.0.0.1/locadora --username postgres --password 123456 --table clientes2 --hive-import --create-hive-table --hive-table LOCADORA.CLIENTES2;
+sqoop import -connect jdbc:postgresql://127.0.0.1/locadora --username postgres --password 123456 --table veiculos --hive-import --create-hive-table --hive-table LOCADORA.veiculos;
+sqoop import -connect jdbc:postgresql://127.0.0.1/locadora --username postgres --password 123456 --table despachantes --hive-import --create-hive-table --hive-table LOCADORA.despachantes;
+sqoop import -connect jdbc:postgresql://127.0.0.1/locadora --username postgres --password 123456 --table locacao2 --hive-import --create-hive-table --hive-table LOCADORA.LOCACAO2;
+
+ 
