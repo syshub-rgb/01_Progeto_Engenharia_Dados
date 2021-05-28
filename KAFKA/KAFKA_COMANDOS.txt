@@ -1,0 +1,50 @@
+-- inicializando o apache zookeeper
+cd /opt/kafka
+
+
+-- depois inicializa o zookeeper
+bin/zookeeper-server-start.sh config/zookeeper.properties
+
+
+-- iniciando o Broker
+cd /opt/kafka
+
+bin/kafka-server-start.sh config/server.properties 
+
+
+-- criando um topico
+cd /opt/kafka
+
+
+-- criando um topico
+cd /opt/kafka
+
+bin/kafka-topics.sh --create --topic topico1 --zookeeper localhost:2181 --replication-factor 1 --partitions 1
+
+-- gerando mesagens para o topico 
+bin/kafka-console-producer.sh --broker-list localhost:9092 --topic topico1
+
+Mensagem 1 para o Topico 1
+Mensagem 2 para o Topico 1
+Mensagem 3 para o Topico 1
+Mensagem 4 para o Topico 1
+
+
+-- criando um topico de Backup
+bin/kafka-console-producer.sh --broker-list localhost:9092 --topic BackupTopic
+Test Message 1
+
+
+
+
+--- verificando os topicos que estão criados
+bin/kafka-topics.sh --list --zookeeper localhost:2181
+
+
+
+
+
+--- consumindo as mensagens
+cd /opt/kafka
+
+bin/kafka-console-consumer.sh --zookeeper localhost:2181 --topic topico1 --from-beginning
