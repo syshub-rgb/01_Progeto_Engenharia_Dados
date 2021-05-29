@@ -1,0 +1,68 @@
+192.168.15.99
+
+-- comandos PIG 
+-- com o PIG podemos agendar scripts para carregar dados, podemos agendar
+-- Carregando os dados do HDFS
+
+-- verifica os dados no HDFS 
+hdfs dfs -ls /user/cloudera/
+
+-- rodando o pig no modo mapreduce
+pig -x mapreduce 
+
+-- carregar dados do HDFS
+dimensaocliente = LOAD '/user/cloudera/dimensaocliente' USING PigStorage(',') as 
+(chavecliente:int, idcliente:int, cliente:chararray, estado:chararray, sexo:chararray, status:chararray,
+datainiciovalidade:datetime, datafinvalidade:datetime);
+
+
+fatovendas  = LOAD '/user/cloudera/fatovendas/' USING PigStorage(',') as
+(chavevendas:int, chavevendedor:int, chavecliente:int, chaveproduto:int,  chavetempo:int, quantidade:int, valorunitario:float, valortotal:float, desconto:float);
+
+
+--exibir os dados
+dump dimensaocliente; 
+dump fatovendas;
+
+
+
+-- limitar para 10 registros 
+dim10 = limit dimensaocliente 10;
+dump dim10;
+
+-- schema
+describe dimensaocliente;
+
+
+-- agrupa por status
+clienteporstatus = GROUP dimensaocliente by status;
+dump clienteporstatus;
+
+-- join 
+juncaocliente = JOIN fatovendas by chavecliente, dimensaocliente by chavecliente;
+dump juncaocliente;
+
+
+-- filtro 
+dimensaoclientePlatinum = FILTER dimensaocliente BY status == 'Platinum';
+dump dimensaoclientePlatinum;
+
+
+-- split - divide em duas relações
+SPLIT dimensaocliente into dimensaoGold if status=='Silver', dimensaoPlatinum if status=='Platinum';
+DUMP dimensaoPlatinum;
+
+
+-- cliente ordenado
+dimensaoclienteorder = ORDER dimensaocliente BY cliente ASC;
+dump dimensaoclienteorder;
+
+
+-- comando para persistir os dados 
+STORE dimensaoclientePlatinum INTO '/user/cloudera/pig/' USING PigStorage(',');
+
+
+-- verificando so dados carregados pelo PIG 
+hdfs dfs -ls /user/cloudera/pig/
+
+hdfs dfs -cat /user/cloudera/pig/part-m-00000
