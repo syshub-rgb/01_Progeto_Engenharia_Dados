@@ -1,0 +1,35 @@
+-- O treinamento foi feito pela DSA
+-- MAQUINA UTILIZADA: DataServerHADOOP
+-- USUÁRIO          : hadoop
+-- SENHA            : dsahadoop
+-- IP               : 192.168.15.21
+
+
+-- instalando o NIFI - pasta Downloads 
+wget https://downloads.apache.org/nifi/1.13.2/nifi-1.13.2-bin.zip
+
+unzip nifi-1.13.2-bin.zip
+
+rm -rf nifi-1.13.2-bin.zip
+
+sudo mv nifi-1.13.2/ /opt/nifi 
+
+-- configurando o NIFI 
+vi nifi-env.sh
+
+
+-- no diretório bin dentro da psta do NIFI você inicializa o NIFI 
+./nifi.sh run
+
+-- aparecendo a mensagem abaixo está ok:
+2021-05-31 10:41:09,212 INFO [main] org.apache.nifi.bootstrap.Command Launched Apache NiFi with Process ID 3514
+
+
+http://localhost:8080:nifi
+
+localhost:8080/nifi
+
+192.168.15.21:8080/nifi
+
+http://localhost:8080/nifi/
+http://192.168.15.21:8080/nifi/
