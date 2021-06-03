@@ -1,0 +1,118 @@
+-- O treinamento foi feito pela DSA - projeto academico - https://www.datascienceacademy.com.br/
+-- MAQUINA UTILIZADA: DataServerHADOOP
+-- USUÁRIO          : hadoop
+-- SENHA            : dsahadoop
+-- IP               : 192.168.15.21
+
+-- primeiramente executar o HDFS 
+start-dfs.sh
+stop-dfs.sh 
+
+-- depois executar o YARN
+start-yarn.sh
+stop-yarn.sh
+
+-- configura o HBASE para Pseudo-Distribuído
+cd /opt/hbase/conf
+	hbase-env.sh
+	regionservers
+	hbase-site.xml
+	
+
+-- Para executar o HBase, HBase em Modo Pseudo-Distribuído abra o terminal e digite: 
+start-hbase.sh
+
+
+-- verifica o que está executando
+jps
+
+-- 3024 ResourceManager
+-- 2545 DataNode
+-- 4115 HMaster
+-- 4789 HMaster
+-- 2727 SecondaryNameNode
+-- 4935 HRegionServer
+-- 3146 NodeManager
+-- 5196 Jps
+-- 4654 HQuorumPeer
+
+-- Parte 1 - Carregar dados no HDFS
+-- carregando os dados no HDFS com o PIG 
+
+-- coloca o arquivo no 
+clientes.txt /home/hadoop
+
+-- inicia o HDFS 
+start-dfs.sh
+
+
+
+-- Criar diretório
+hdfs dfs -mkdir /user/dados
+hdfs dfs -mkdir /user/dados/clientes
+
+-- Carregar dados no HDFS
+--- falta comando e está no meu backup
+
+
+-- Parte 2 - Criar tabela no HBase
+
+-- Abrir o shell
+hbase shell
+
+-- Cria uma tabela com uma column family para receber os dados
+create 'clientes', 'dados_cliente'
+
+
+-- Parte 3 - Carregar dados com Pig
+
+-- Inicie o Job History Server
+--- falta comando e está no meu backup
+
+-- Abrir o shell do Pig
+pig -x mapreduce (em caso de probemas, use pig -x local)
+
+-- Navegar até o diretório
+cd /user/dados/clientes;
+
+-- Carregar dados do HDFS para o Pig
+--- falta comando e está no meu backup
+
+-- Testa os dados
+dump dados;
+
+-- Usando Pig Store
+STORE dados INTO 'hbase://clientes' USING org.apache.pig.backend.hadoop.hbase.HBaseStorage(
+'dados_clientes:nome 
+ dados_clientes:sobrenome 
+ dados_clientes:idade 
+ dados_clientes:funcao'
+);
+
+
+
+
+-- Parte 3 - Manipulando dados no HBase
+
+-- Abrir o shell
+hbase shell
+
+-- Scan na tabela
+scan 'clientes'
+
+
+count 'clientes'
+
+
+get 'clientes', '1100002', {COLUMN => 'dados_clientes:nome'}
+put 'clientes', '1100002', 'dados_clientes:nome', 'Bob'
+put 'clientes', '2100002', 'dados_clientes:nome', 'Zico'
+put 'clientes', '2100002', 'dados_clientes:sobrenome', 'Galinho'
+put 'clientes', '2100002', 'dados_clientes:idade', '50'
+put 'clientes', '2100002', 'dados_clientes:funcao', 'Jogador'
+
+delete 'clientes', '2100002', 'dados_clientes:funcao'
+
+deleteall 'clientes', '2100002'
+
+
